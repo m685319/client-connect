@@ -1,0 +1,49 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1.1-insert-contacts
+      author: maria
+      changes:
+        - insert:
+            tableName: contacts
+            columns:
+              - column: { name: id, value: 1 }
+              - column: { name: phone, value: "+1234567890" }
+              - column: { name: email, value: "alice@example.com" }
+        - insert:
+            tableName: contacts
+            columns:
+              - column: { name: id, value: 2 }
+              - column: { name: phone, value: "+1987654321" }
+              - column: { name: email, value: "bob@example.com" }
+        - insert:
+            tableName: contacts
+            columns:
+              - column: { name: id, value: 3 }
+              - column: { name: phone, value: "+1122334455" }
+              - column: { name: email, value: "charlie@example.com" }
+
+  - changeSet:
+      id: 1.2-insert-clients
+      author: maria
+      changes:
+        - insert:
+            tableName: clients
+            columns:
+              - column: { name: client_id, value: 1 }
+              - column: { name: name, value: "Alice" }
+              - column: { name: last_name, value: "Johnson" }
+              - column: { name: contact_id, value: 1 }
+        - insert:
+            tableName: clients
+            columns:
+              - column: { name: client_id, value: 2 }
+              - column: { name: name, value: "Bob" }
+              - column: { name: last_name, value: "Smith" }
+              - column: { name: contact_id, value: 2 }
+        - insert:
+            tableName: clients
+            columns:
+              - column: { name: client_id, value: 3 }
+              - column: { name: name, value: "Charlie" }
+              - column: { name: last_name, value: "Brown" }
+              - column: { name: contact_id, value: 3 }
