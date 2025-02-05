@@ -1,23 +1,19 @@
-server:
-  port: 8080
-
 spring:
   application:
-    name: client-connect
+    name: clients
   datasource:
-    url: jdbc:postgresql://localhost:5432/clients_db
+    url: jdbc:postgresql://localhost:5432/clients
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
 
   jpa:
     database: postgresql
+    hibernate.ddl-auto: none
     show-sql: true
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        format_sql: true
+  sql:
+    init:
+      mode: never
 
 springdoc:
   api-docs:
@@ -25,3 +21,4 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
+server.port: 8080
