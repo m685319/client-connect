@@ -43,11 +43,12 @@ public class ContactController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Contact> updateContact(@PathVariable Long id, @RequestBody Contact contact) {
-        Optional<Contact> existingContact = contactService.getContactById(id);
-        if (existingContact.isPresent()) {
-            contact.setId(id);
-            Contact updatedContact = contactService.saveContact(contact);
-            return ResponseEntity.ok(updatedContact);
+        Optional<Contact> optionalContact = contactService.getContactById(id);
+        if (optionalContact.isPresent()) {
+            Contact existingContact = optionalContact.get();
+            existingContact.setPhone(contact.getPhone());
+            existingContact.setEmail(contact.getEmail());
+            return ResponseEntity.ok(contactService.saveContact(existingContact));
         } else {
             return ResponseEntity.notFound().build();
         }

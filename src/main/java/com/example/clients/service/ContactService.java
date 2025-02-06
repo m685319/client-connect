@@ -26,6 +26,14 @@ public class ContactService {
         return contactRepository.save(contact);
     }
 
+    public Optional<Contact> updateContact(Long id, Contact updatedContact) {
+        return contactRepository.findById(id).map(existingContact -> {
+            existingContact.setPhone(updatedContact.getPhone());
+            existingContact.setEmail(updatedContact.getEmail());
+            return contactRepository.save(existingContact);
+        });
+    }
+
     public void deleteContact(Long contactId) {
         contactRepository.deleteById(contactId);
     }
