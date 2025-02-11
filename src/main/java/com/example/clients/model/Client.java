@@ -16,6 +16,7 @@ public class Client {
     private Long clientId;
 
     private String name;
+
     private String lastName;
 
     @OneToOne(cascade = CascadeType.ALL)

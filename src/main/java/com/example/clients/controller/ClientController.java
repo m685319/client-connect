@@ -1,5 +1,6 @@
 package com.example.clients.controller;
 
+import com.example.clients.ClientDTO;
 import com.example.clients.model.Client;
 import com.example.clients.service.ClientService;
 import lombok.RequiredArgsConstructor;
@@ -36,26 +37,19 @@ public class ClientController {
     }
 
     @PostMapping
-    public ResponseEntity<Client> createClient(@RequestBody Client client) {
-        Client savedClient = clientService.saveClient(client);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedClient);
+    public ResponseEntity<ClientDTO> createClient(@RequestBody ClientDTO client) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(clientService.saveClient(client));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Client> updateClient(@PathVariable Long id, @RequestBody Client client) {
-        Optional<Client> existingClient = clientService.getClientById(id);
-        if (existingClient.isPresent()) {
-            client.setClientId(id);
-            Client updatedClient = clientService.saveClient(client);
-            return ResponseEntity.ok(updatedClient);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ClientDTO updateClient(@PathVariable Long id, @RequestBody ClientDTO clientDTO) {
+        return clientService.updateClient(id, clientDTO);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteClient(@PathVariable Long id) {
+    public void deleteClient(@PathVariable Long id) {
         clientService.deleteClient(id);
-        return ResponseEntity.noContent().build();
     }
 }

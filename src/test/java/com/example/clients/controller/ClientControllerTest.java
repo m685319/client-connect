@@ -1,5 +1,6 @@
 package com.example.clients.controller;
 
+import com.example.clients.ClientDTO;
 import com.example.clients.model.Client;
 import com.example.clients.service.ClientService;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +19,8 @@ import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 class ClientControllerTest {
@@ -30,13 +32,13 @@ class ClientControllerTest {
     @InjectMocks
     private ClientController clientController;
 
-    private Client client;
+    private ClientDTO client;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(clientController).build();
 
-        client = new Client();
+        client = new ClientDTO();
         client.setClientId(1L);
         client.setName("John");
         client.setLastName("Doe");
@@ -78,7 +80,7 @@ class ClientControllerTest {
 
     @Test
     void testCreateClient() throws Exception {
-        when(clientService.saveClient(any(Client.class))).thenReturn(client);
+        when(clientService.saveClient(any(ClientDTO.class))).thenReturn(client);
 
         mockMvc.perform(post("/clients")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -92,7 +94,7 @@ class ClientControllerTest {
     @Test
     void testUpdateClient() throws Exception {
         when(clientService.getClientById(1L)).thenReturn(Optional.of(client));
-        when(clientService.saveClient(any(Client.class))).thenReturn(client);
+        when(clientService.saveClient(any(ClientDTO.class))).thenReturn(client);
 
         mockMvc.perform(put("/clients/1")
                         .contentType(MediaType.APPLICATION_JSON)
