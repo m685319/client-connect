@@ -1,6 +1,7 @@
 package com.example.clients.service;
 
-import com.example.clients.ClientDTO;
+import com.example.clients.dto.ClientDTO;
+import com.example.clients.mapper.ClientMapper;
 import com.example.clients.model.Client;
 import com.example.clients.repository.ClientRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -15,6 +16,7 @@ import java.util.Optional;
 public class ClientService {
 
     private final ClientRepository clientRepository;
+    private final ClientMapper clientMapper;
 
     public List<Client> getAllClients() {
         return clientRepository.findAll();
@@ -25,8 +27,8 @@ public class ClientService {
     }
 
     public ClientDTO saveClient(ClientDTO clientDTO) {
-        Client client = toEntity(clientDTO);
-        return toDTO(clientRepository.save(client));
+        Client client = clientMapper.toEntity(clientDTO);
+        return clientMapper.toDto(clientRepository.save(client));
     }
 
     public void deleteClient(Long clientId) {
@@ -40,37 +42,9 @@ public class ClientService {
             client.setName(clientDTO.getName());
             client.setLastName(clientDTO.getLastName());
             client = clientRepository.save(client);
-            return toDTO(client);
+            return clientMapper.toDto(client);
         } else {
             throw new EntityNotFoundException("Client with id " + id + " not found");
         }
-    }
-
-    private ClientDTO toDTO(Client client) {
-        ClientDTO clientDTO = new ClientDTO();
-        if (client.getClientId() != null) {
-            clientDTO.setClientId(client.getClientId());
-        }
-        if (client.getName() != null) {
-            clientDTO.setName(client.getName());
-        }
-        if (client.getLastName() != null) {
-            clientDTO.setLastName(client.getLastName());
-        }
-        return clientDTO;
-    }
-
-    private Client toEntity(ClientDTO clientDTO) {
-        Client client = new Client();
-        if (clientDTO.getClientId() != null) {
-            client.setClientId(clientDTO.getClientId());
-        }
-        if (clientDTO.getName() != null) {
-            client.setName(clientDTO.getName());
-        }
-        if (clientDTO.getLastName() != null) {
-            client.setLastName(clientDTO.getLastName());
-        }
-        return client;
     }
 }

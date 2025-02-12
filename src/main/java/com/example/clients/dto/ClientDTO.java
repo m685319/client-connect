@@ -1,4 +1,4 @@
-package com.example.clients;
+package com.example.clients.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
@@ -11,4 +11,5 @@ public class ClientDTO {
     private Long clientId;
     private String name;
     private String lastName;
+    private Long contactId;
 }

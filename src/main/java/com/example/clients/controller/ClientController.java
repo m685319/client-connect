@@ -1,6 +1,6 @@
 package com.example.clients.controller;
 
-import com.example.clients.ClientDTO;
+import com.example.clients.dto.ClientDTO;
 import com.example.clients.model.Client;
 import com.example.clients.service.ClientService;
 import lombok.RequiredArgsConstructor;
