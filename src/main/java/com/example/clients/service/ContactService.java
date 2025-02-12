@@ -1,40 +1,47 @@
 package com.example.clients.service;
 
+import com.example.clients.dto.ContactDTO;
+import com.example.clients.exception.EntityNotFoundException;
+import com.example.clients.mapper.ContactMapper;
 import com.example.clients.model.Contact;
 import com.example.clients.repository.ContactRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ContactService {
 
     private final ContactRepository contactRepository;
+    private final ContactMapper contactMapper;
 
-    public List<Contact> getAllContacts() {
-        return contactRepository.findAll();
+    public List<ContactDTO> getAllContacts() {
+        return contactMapper.toDto(contactRepository.findAll());
     }
 
-    public Optional<Contact> getContactById(Long contactId) {
-        return contactRepository.findById(contactId);
+    public ContactDTO getContactById(Long id) {
+        return contactMapper.toDto(contactRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Contact with id " + id + " not found")));
     }
 
-    public Contact saveContact(Contact contact) {
-        return contactRepository.save(contact);
+    public ContactDTO saveContact(ContactDTO contactDTO) {
+        Contact contact = contactMapper.toEntity(contactDTO);
+        return contactMapper.toDto(contactRepository.save(contact));
     }
 
-    public Optional<Contact> updateContact(Long id, Contact updatedContact) {
-        return contactRepository.findById(id).map(existingContact -> {
-            existingContact.setPhone(updatedContact.getPhone());
-            existingContact.setEmail(updatedContact.getEmail());
-            return contactRepository.save(existingContact);
-        });
+    public ContactDTO updateContact(Long id, ContactDTO contactDTO) {
+        Contact contact = contactRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Contact with id " + id + " not found"));
+
+        contact.setPhone(contactDTO.getPhone());
+        contact.setEmail(contactDTO.getEmail());
+
+        return contactMapper.toDto(contactRepository.save(contact));
     }
 
-    public void deleteContact(Long contactId) {
-        contactRepository.deleteById(contactId);
+    public void deleteContact(Long id) {
+        contactRepository.deleteById(id);
     }
 }

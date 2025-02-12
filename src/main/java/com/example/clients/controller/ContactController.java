@@ -1,6 +1,6 @@
 package com.example.clients.controller;
 
-import com.example.clients.model.Contact;
+import com.example.clients.dto.ContactDTO;
 import com.example.clients.service.ContactService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/contacts")
@@ -25,38 +24,29 @@ public class ContactController {
     private final ContactService contactService;
 
     @GetMapping
-    public List<Contact> getAllContacts() {
+    public List<ContactDTO> getAllContacts() {
         return contactService.getAllContacts();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Contact> getContactById(@PathVariable Long id) {
-        Optional<Contact> contact = contactService.getContactById(id);
-        return contact.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ContactDTO getContactById(@PathVariable Long id) {
+        return contactService.getContactById(id);
     }
 
     @PostMapping
-    public ResponseEntity<Contact> createContact(@RequestBody Contact contact) {
-        Contact savedContact = contactService.saveContact(contact);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedContact);
+    public ResponseEntity<ContactDTO> createContact(@RequestBody ContactDTO contactDTO) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(contactService.saveContact(contactDTO));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Contact> updateContact(@PathVariable Long id, @RequestBody Contact contact) {
-        Optional<Contact> optionalContact = contactService.getContactById(id);
-        if (optionalContact.isPresent()) {
-            Contact existingContact = optionalContact.get();
-            existingContact.setPhone(contact.getPhone());
-            existingContact.setEmail(contact.getEmail());
-            return ResponseEntity.ok(contactService.saveContact(existingContact));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ContactDTO updateContact(@PathVariable Long id, @RequestBody ContactDTO contactDTO) {
+        return contactService.updateContact(id, contactDTO);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteContact(@PathVariable Long id) {
+    public void deleteContact(@PathVariable Long id) {
         contactService.deleteContact(id);
-        return ResponseEntity.noContent().build();
     }
 }
