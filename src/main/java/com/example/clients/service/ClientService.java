@@ -18,12 +18,12 @@ public class ClientService {
     private final ClientRepository clientRepository;
     private final ClientMapper clientMapper;
 
-    public List<Client> getAllClients() {
-        return clientRepository.findAll();
+    public List<ClientDTO> getAllClients() {
+        return clientMapper.toDto(clientRepository.findAll());
     }
 
-    public Optional<Client> getClientById(Long clientId) {
-        return clientRepository.findById(clientId);
+    public ClientDTO getClientById(Long clientId) {
+        return clientMapper.toDto(clientRepository.findById(clientId).orElseThrow(EntityNotFoundException::new));
     }
 
     public ClientDTO saveClient(ClientDTO clientDTO) {

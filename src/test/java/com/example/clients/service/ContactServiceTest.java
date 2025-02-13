@@ -1,20 +1,21 @@
 package com.example.clients.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import com.example.clients.dto.ContactDTO;
+import com.example.clients.mapper.ContactMapper;
 import com.example.clients.model.Contact;
 import com.example.clients.repository.ContactRepository;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,26 +24,39 @@ class ContactServiceTest {
     @Mock
     private ContactRepository contactRepository;
 
+    @Mock
+    private ContactMapper contactMapper;
+
     @InjectMocks
     private ContactService contactService;
 
-    private Contact contact;
+    private static Contact contact;
+    private static ContactDTO contactDTO;
 
-    @BeforeEach
-    void setUp() {
+    @BeforeAll
+    static void beforeAll() {
         contact = new Contact();
         contact.setId(1L);
         contact.setPhone("+123456789");
         contact.setEmail("test@example.com");
+
+        contactDTO = new ContactDTO();
+        contactDTO.setId(1L);
+        contactDTO.setPhone("+123456789");
+        contactDTO.setEmail("test@example.com");
     }
 
     @Test
     void testGetAllContacts() {
-        List<Contact> contacts = Arrays.asList(contact);
+        // given
+        var contacts = List.of(contact);
+        when(contactMapper.toDto(contacts)).thenReturn(List.of(contactDTO));
         when(contactRepository.findAll()).thenReturn(contacts);
 
-        List<Contact> result = contactService.getAllContacts();
+        // when
+        var result = contactService.getAllContacts();
 
+        // then
         assertEquals(1, result.size());
         assertEquals("+123456789", result.get(0).getPhone());
         verify(contactRepository, times(1)).findAll();
@@ -50,32 +64,41 @@ class ContactServiceTest {
 
     @Test
     void testGetContactById() {
+        // given
         when(contactRepository.findById(1L)).thenReturn(Optional.of(contact));
+        when(contactMapper.toDto(contact)).thenReturn(contactDTO);
 
-        Optional<Contact> result = contactService.getContactById(1L);
+        // when
+        var result = contactService.getContactById(1L);
 
-        assertTrue(result.isPresent());
-        assertEquals("test@example.com", result.get().getEmail());
+        // then
+        assertNotNull(result);
+        assertEquals("test@example.com", result.getEmail());
         verify(contactRepository, times(1)).findById(1L);
     }
 
     @Test
     void testSaveContact() {
-        when(contactRepository.save(contact)).thenReturn(contact);
+        // given
+        doReturn(contact).when(contactMapper).toEntity(contactDTO);
+        doReturn(contact).when(contactRepository).save(contact);
+        doReturn(contactDTO).when(contactMapper).toDto(contact);
 
-        Contact result = contactService.saveContact(contact);
+        // when
+        var result = contactService.saveContact(contactDTO);
 
+        // then
         assertNotNull(result);
         assertEquals("+123456789", result.getPhone());
-        verify(contactRepository, times(1)).save(contact);
+        verify(contactRepository).save(contact);
     }
 
     @Test
     void testDeleteContact() {
-        doNothing().when(contactRepository).deleteById(1L);
-
+        // when
         contactService.deleteContact(1L);
 
+        // then
         verify(contactRepository, times(1)).deleteById(1L);
     }
 

@@ -1,7 +1,6 @@
 package com.example.clients.controller;
 
 import com.example.clients.dto.ClientDTO;
-import com.example.clients.model.Client;
 import com.example.clients.service.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/clients")
@@ -26,14 +24,13 @@ public class ClientController {
     private final ClientService clientService;
 
     @GetMapping
-    public List<Client> getAllClients() {
+    public List<ClientDTO> getAllClients() {
         return clientService.getAllClients();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Client> getClientById(@PathVariable Long id) {
-        Optional<Client> client = clientService.getClientById(id);
-        return client.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ClientDTO getClientById(@PathVariable Long id) {
+      return clientService.getClientById(id);
     }
 
     @PostMapping
