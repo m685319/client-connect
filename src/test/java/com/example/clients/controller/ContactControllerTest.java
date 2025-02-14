@@ -1,20 +1,19 @@
 package com.example.clients.controller;
 
-import com.example.clients.model.Contact;
+import com.example.clients.dto.ContactDTO;
+import com.example.clients.exception.EntityNotFoundException;
+import com.example.clients.exception.GlobalExceptionHandler;
 import com.example.clients.service.ContactService;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -22,28 +21,37 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-@WebMvcTest(ContactController.class)
 class ContactControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    private static final Long CONTACT_ID = 1L;
 
-    @MockBean
-    private ContactService contactService;
+    private static MockMvc mockMvc;
 
-    private Contact contact;
+    private static ContactService contactService;
 
-    @BeforeEach
-    void setUp() {
-        contact = new Contact();
-        contact.setId(1L);
-        contact.setPhone("+123456789");
-        contact.setEmail("test@example.com");
+    private static ContactDTO contactDTO;
+
+    @BeforeAll
+    static void beforeAll() {
+        contactService = mock(ContactService.class);
+        mockMvc = MockMvcBuilders.standaloneSetup(new ContactController(contactService))
+                .setControllerAdvice(GlobalExceptionHandler.class)
+                .build();
+
+        contactDTO = new ContactDTO();
+        contactDTO.setId(CONTACT_ID);
+        contactDTO.setPhone("+123456789");
+        contactDTO.setEmail("test@example.com");
+    }
+
+    @AfterEach
+    void tearDown() {
+        reset(contactService);
     }
 
     @Test
     void testGetAllContacts() throws Exception {
-        List<Contact> contacts = Arrays.asList(contact);
+        var contacts = Arrays.asList(contactDTO);
         when(contactService.getAllContacts()).thenReturn(contacts);
 
         mockMvc.perform(get("/contacts"))
@@ -56,28 +64,29 @@ class ContactControllerTest {
 
     @Test
     void testGetContactById() throws Exception {
-        when(contactService.getContactById(1L)).thenReturn(Optional.of(contact));
+        when(contactService.getContactById(CONTACT_ID)).thenReturn(contactDTO);
 
         mockMvc.perform(get("/contacts/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.phone").value("+123456789"));
+                .andExpect(jsonPath("$.phone").value("+123456789"))
+                .andExpect(jsonPath("$.email").value("test@example.com"));
 
-        verify(contactService, times(1)).getContactById(1L);
+        verify(contactService, times(1)).getContactById(CONTACT_ID);
     }
 
     @Test
     void testGetContactById_NotFound() throws Exception {
-        when(contactService.getContactById(1L)).thenReturn(Optional.empty());
+        when(contactService.getContactById(CONTACT_ID)).thenThrow(EntityNotFoundException.class);
 
         mockMvc.perform(get("/contacts/1"))
                 .andExpect(status().isNotFound());
 
-        verify(contactService, times(1)).getContactById(1L);
+        verify(contactService, times(1)).getContactById(CONTACT_ID);
     }
 
     @Test
     void testCreateContact() throws Exception {
-        when(contactService.saveContact(any(Contact.class))).thenReturn(contact);
+        when(contactService.saveContact(any(ContactDTO.class))).thenReturn(contactDTO);
 
         mockMvc.perform(post("/contacts")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -85,32 +94,29 @@ class ContactControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.phone").value("+123456789"));
 
-        verify(contactService, times(1)).saveContact(any(Contact.class));
+        verify(contactService, times(1)).saveContact(any(ContactDTO.class));
     }
 
     @Test
     void testUpdateContact() throws Exception {
-        when(contactService.getContactById(1L)).thenReturn(Optional.of(contact));
-        when(contactService.saveContact(any(Contact.class))).thenReturn(contact);
+        when(contactService.getContactById(CONTACT_ID)).thenReturn(contactDTO);
+        when(contactService.updateContact(eq(CONTACT_ID), any(ContactDTO.class))).thenReturn(contactDTO);
 
         mockMvc.perform(put("/contacts/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"phone\":\"+987654321\",\"email\":\"test@example.com\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.phone").value("+987654321"));
+                .andExpect(jsonPath("$.email").value("test@example.com"));
 
-        verify(contactService, times(1)).getContactById(1L);
-        verify(contactService, times(1)).saveContact(any(Contact.class));
+        verify(contactService, times(1)).updateContact(eq(CONTACT_ID) ,any(ContactDTO.class));
     }
 
     @Test
     void testDeleteContact() throws Exception {
-        doNothing().when(contactService).deleteContact(1L);
-
         mockMvc.perform(delete("/contacts/1"))
                 .andExpect(status().isNoContent());
 
-        verify(contactService, times(1)).deleteContact(1L);
+        verify(contactService, times(1)).deleteContact(CONTACT_ID);
     }
 
 }
